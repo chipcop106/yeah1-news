@@ -1,14 +1,18 @@
 import type { AppContext, AppProps } from 'next/app';
 import App from 'next/app';
 import Head from 'next/head';
+import NextNprogress from 'nextjs-progressbar';
 import {
   ChakraProvider,
   cookieStorageManager,
   localStorageManager,
 } from '@chakra-ui/react';
+import { ApolloProvider } from '@apollo/client';
+import { useApollo } from '../lib/apolloClient';
 import theme from '@/styles/theme';
 import { DefaultSeo } from 'next-seo';
 import SEO from '../next-seo.config';
+
 
 const Chakra = ({ cookies, children }) => {
   // b) Pass `colorModeManager` prop
@@ -26,18 +30,28 @@ const Chakra = ({ cookies, children }) => {
 const MyApp = (props: AppProps) => {
   const { Component, pageProps } = props as any;
   const Layout = Component.layout || (({ children }) => <>{children}</>);
+  const apolloClient = useApollo(pageProps.initialApolloState);
+
   return (
-    <Chakra cookies={pageProps.cookies}>
-      <>
-        <Head>
-          <></>
-        </Head>
-        <Layout>
-          <DefaultSeo {...SEO} />
-          <Component {...pageProps} />
-        </Layout>
-      </>
-    </Chakra>
+    <ApolloProvider client={apolloClient}>
+      <Chakra cookies={pageProps.cookies}>
+        <>
+          <Head>
+            <></>
+          </Head>
+          <Layout>
+            <NextNprogress
+                color="#02f0dc"
+                startPosition={0.3}
+                stopDelayMs={200}
+                height={4}
+            />
+            <DefaultSeo {...SEO} />
+            <Component {...pageProps} />
+          </Layout>
+        </>
+      </Chakra>
+    </ApolloProvider>
   );
 };
 

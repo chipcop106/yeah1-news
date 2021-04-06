@@ -95,7 +95,7 @@ const TransparentCard: FC<CardProps> = ({
             left={0}
           />
           <Box
-            bg={`linear-gradient(0deg, rgb(4, 4, 125) 50%, rgb(215, 211, 249) 75%)`}
+            bg={`linear-gradient(0deg, rgb(1,53,255) 50%, rgb(215, 211, 249) 75%)`}
             opacity={0.25}
             pos={`absolute`}
             bottom={0}

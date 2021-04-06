@@ -1,3 +1,8 @@
+import { fromUnixTime, format } from 'date-fns'
+import {default as vnLocale} from 'date-fns/locale/vi'
+
+
+
 export const vnSlugGenerator = (str: string, separator: string = '-') => {
   str = str
     .toLowerCase()
@@ -29,3 +34,22 @@ export const getDocsHeight = () => {
 export const checkScrollReachBottom = () => {
   return window.innerHeight + window.pageYOffset >= getDocsHeight();
 };
+
+export function getStrapiURL(path = '') {
+  return `${
+    process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:3030'
+  }/v1${path}`;
+}
+
+export async function fetchAPI(path) {
+  const requestUrl = getStrapiURL(path);
+  const response = await fetch(requestUrl);
+  const data = await response.json();
+  return data;
+}
+
+export const formatUnixDate = (unixTime, customFormat = 'EEEE, dd/MM/yyyy') => {
+  if(isNaN(unixTime)) return '';
+  const date = fromUnixTime(unixTime);
+  return format(date, customFormat, { locale: vnLocale })
+}

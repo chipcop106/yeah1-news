@@ -16,20 +16,26 @@ import {
   Link,
   Stack,
   Button,
-  useBreakpointValue,
+  useBreakpointValue, Spinner,
 } from '@chakra-ui/react';
 import Layout from '@/components/layout';
 import { FaBookReader } from 'react-icons/fa';
 import { socialPosts, trendingPosts } from '../../data-sample';
-import { checkScrollReachBottom, vnSlugGenerator } from '../../helpers/utils';
+import {checkScrollReachBottom, formatUnixDate, vnSlugGenerator} from '../../helpers/utils';
 import { HorizontalCard } from '@/components/BlogCard';
 import CategoryTitle from '../../components/widgets/CategoryTitle';
 import { IoPeopleOutline, IoTimerOutline } from 'react-icons/io5';
 import { AiFillRead } from 'react-icons/ai';
 import { useEffect, useState } from 'react';
 import { NextSeo } from 'next-seo';
+import {initializeApollo} from "../../lib/apolloClient";
+import { GET_POST, ALL_CATEGORIES } from '@/services/GraphSchema';
+import {nanoid} from "nanoid";
+import { useRouter } from 'next/router'
+import {useQuery} from "@apollo/client";
 
-const Article = ({ relatedArticles, article }) => {
+const Article = ({ relatedArticles }) => {
+  const router = useRouter();
   const { colorMode } = useColorMode();
   const [isLoading, setIsLoading] = useState(false);
   const headingSizes = useBreakpointValue({
@@ -37,6 +43,14 @@ const Article = ({ relatedArticles, article }) => {
     sm: 'sm',
     md: 'md',
   });
+  const {loading:postLoading, error:postError, data:postData} = useQuery( GET_POST,{
+    variables: {
+      id: router.query.slug
+    }
+  });
+  const {loading:categoriesLoading, error:categoriesError, data:categoriesData} = useQuery(ALL_CATEGORIES);
+
+
 
   const loadmoreRelatedPost = () => {
     setIsLoading(true);
@@ -58,18 +72,28 @@ const Article = ({ relatedArticles, article }) => {
     };
   }, []);
 
+
+  if (postLoading || categoriesLoading) return <Stack direction="column" alignItems="center" justifyContent="center" flexGrow={1} height="100vh">
+    <Spinner size="xl" />
+  </Stack>;
+
+  const article = {
+    ...postData.content,
+    category: categoriesData.categories.find(item => item.tags.find(tag => tag.id === postData.content.content_tags[0]))
+  };
+
   return (
     <>
       <NextSeo
         title={article.title}
         description={article.description}
         openGraph={{
-          url: `/article/${vnSlugGenerator(article.title)}`,
+          url: `${process.env.BASE_URL ? process.env.BASE_URL : 'http://localhost:3000'}/article/${article.slug}`,
           title: article.title,
           description: article.description,
           images: [
             {
-              url: article.imageUrl,
+              url: article?.imageUrl ?? article.extra_info.image,
               alt: vnSlugGenerator(article.title, ' '),
               width: 1280,
               height: 720,
@@ -132,7 +156,7 @@ const Article = ({ relatedArticles, article }) => {
                   variant="solid"
                   colorScheme="brand"
                 >
-                  {article?.category}
+                  {article?.category?.name ?? 'Khác'}
                 </Tag>
                 <Text color={`gray.500`} fontSize={`sm`}>
                   {article?.publishDate}
@@ -149,7 +173,7 @@ const Article = ({ relatedArticles, article }) => {
                 borderRadius={0}
               >
                 <Link
-                  href={`https://zingnews.vn/nguoi-dan-se-duoc-tiem-vaccine-ngua-covid-19-mien-phi-post1186491.html`}
+                  href={article.link}
                   target={`_blank`}
                   rel={`noopener`}
                   _hover={{ textDecoration: 'none' }}
@@ -183,7 +207,7 @@ const Article = ({ relatedArticles, article }) => {
               bgPosition={`center 50%`}
               bgSize={`cover`}
               borderRadius={16}
-              bgImage={`url('${article?.imageUrl}')`}
+              bgImage={`url('${article?.imageUrl ?? article.extra_info.image}')`}
             ></Box>
           </Stack>
         </Container>
@@ -267,19 +291,30 @@ const Article = ({ relatedArticles, article }) => {
   );
 };
 
-export async function getServerSideProps() {
-  const relatedArticles = [...socialPosts, ...trendingPosts];
-  const article = relatedArticles[0];
+export async function getServerSideProps({ params }) {
+  const apolloClient = initializeApollo();
+  const res = await apolloClient.query({
+    query: GET_POST,
+    variables: {
+      id: params.slug
+    }
+  });
+  const article = res.data.content;
   if (!article) {
     return {
       notFound: true,
     };
   }
+  const relatedArticles = [...socialPosts, ...trendingPosts];
 
   return {
-    props: { relatedArticles, article },
+    props: {
+      relatedArticles,
+      initialApolloState: apolloClient.cache.extract(),
+    }
   };
 }
+
 
 Article.layout = Layout;
 

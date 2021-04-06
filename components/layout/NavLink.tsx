@@ -19,26 +19,9 @@ const NavLink: FC<NavLinkProps> = (props) => {
         as={`span`}
         pos={`relative`}
         alignItems={`center`}
-        pt={1}
-        pb={2}
         px={6}
         style={{ cursor: `pointer` }}
-        _after={{
-          content: `''`,
-          width: '100%',
-          position: 'absolute',
-          left: 0,
-          bottom: 0,
-          height: 1,
-          opacity: props.isActive ? 1 : 0,
-          backgroundColor: theme.colors.secondary,
-        }}
-        _hover={{
-          textDecoration: `none`,
-          _after: {
-            opacity: 1,
-          },
-        }}
+
       >
         {props.children}
       </Box>

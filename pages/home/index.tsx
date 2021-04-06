@@ -2,14 +2,12 @@ import Layout from '@/components/layout';
 import { FCLayout } from 'global';
 import {
   Container,
-  Flex,
   Box,
   Divider,
   Stack,
   useColorMode,
   Image,
   Button,
-  Heading,
   useBreakpointValue,
   useMediaQuery,
 } from '@chakra-ui/react';
@@ -37,11 +35,14 @@ import {
   musicPosts,
 } from '../../data-sample';
 import { useState } from 'react';
-import { vnSlugGenerator } from '../../helpers/utils';
+import { fetchAPI, vnSlugGenerator } from '../../helpers/utils';
 import VisuallyHidden from '@reach/visually-hidden';
+import { nanoid } from 'nanoid';
+
 
 const posts = [
   {
+    id: nanoid(),
     title: 'Người dân sẽ được tiêm vaccine ngừa Covid-19 miễn phí',
     imageUrl:
       'https://znews-photo.zadn.vn/w960/Uploaded/ovhpaob/2021_02_23/Viet_Hung_Xet_nghiem_nguoi_ve_tu_vung_dich_phuong_Vinh_Tuy1.jpg',
@@ -50,6 +51,8 @@ const posts = [
     publishDate: 'Thứ 5, 20/10/2020',
   },
   {
+    id: nanoid(),
+
     title: 'Hà Nội còn 4 điểm phong tỏa liên quan Covid-19',
     imageUrl:
       'https://znews-photo.zadn.vn/w360/Uploaded/lexw/2021_02_08/thumb.jpg',
@@ -58,6 +61,8 @@ const posts = [
     publishDate: 'Thứ 5, 20/10/2020',
   },
   {
+    id: nanoid(),
+
     title: 'Rosamund Pike - từ lời từ chối cởi đồ đến ‘đóa hồng gai’ nước Anh',
     imageUrl:
       'https://znews-photo.zadn.vn/w360/Uploaded/aobovhp/2021_02_23/rosamund_pike_1534409574.jpg',
@@ -66,6 +71,8 @@ const posts = [
     publishDate: 'Thứ 5, 20/10/2020',
   },
   {
+    id: nanoid(),
+
     title: 'Tự vệ cảm xúc 4.0’ và cách sống an toàn trên mạng xã hội',
     imageUrl:
       'https://znews-photo.zadn.vn/w860/Uploaded/mdf_fedrei/2021_02_21/tu_ve_cam_xuc_4.jpg',
@@ -75,7 +82,7 @@ const posts = [
   },
 ];
 
-const Homepage: FCLayout = () => {
+const Homepage: FCLayout = (props) => {
   const { colorMode } = useColorMode();
   const [isLoading, setIsLoading] = useState(false);
   const headingSizes = useBreakpointValue({

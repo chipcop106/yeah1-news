@@ -1,24 +1,18 @@
-import { FC } from 'react';
-import styled from '@emotion/styled';
+import React, { FC } from 'react';
 import {
-  Img,
   Link,
   Box,
-  useTheme,
   Text,
   Heading,
-  Stack,
   HStack,
   Tag,
-  Button,
-  useColorMode,
   HeadingProps,
 } from '@chakra-ui/react';
-import { IoPeopleOutline, IoPlayOutline } from 'react-icons/io5';
 import { AiOutlinePlayCircle } from 'react-icons/ai';
 import { default as RouteLink } from 'next/link';
 
-interface Post {
+export interface Post {
+  id: string;
   title: string;
   imageUrl: string;
   category: string;
@@ -35,7 +29,7 @@ type space = {
   '2xl'?: string | number;
 };
 
-interface CardProps {
+export interface CardProps {
   post: Post;
   showCategory?: boolean;
   showDescription?: boolean;
@@ -79,7 +73,9 @@ const HorizontalCard: FC<CardProps> = ({
               bgPosition={`center 50%`}
               bgSize={`cover`}
               bgImage={`url('${post.imageUrl}')`}
-            ></Box>
+              className={`post-image`}
+            />
+
             {type === 'video' && (
               <Box
                 pos={`absolute`}
@@ -98,7 +94,12 @@ const HorizontalCard: FC<CardProps> = ({
       <Box flexGrow={1}>
         <RouteLink href={`/article/${post.slug}`}>
           <Link>
-            <Heading mb={2} fontWeight={`semibold`} {...headingProps}>
+            <Heading
+              mb={2}
+              fontWeight={`semibold`}
+              {...headingProps}
+              data-testid="title"
+            >
               {post.title}
             </Heading>
           </Link>
@@ -111,6 +112,7 @@ const HorizontalCard: FC<CardProps> = ({
               key={`sm`}
               variant="solid"
               colorScheme="brand"
+              data-testid="category"
             >
               {post.category}
             </Tag>
@@ -127,6 +129,7 @@ const HorizontalCard: FC<CardProps> = ({
             mt={2}
             fontSize={`sm`}
             noOfLines={2}
+            data-testid="description"
           >
             {post.description}
           </Text>

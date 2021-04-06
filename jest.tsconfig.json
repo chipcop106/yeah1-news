@@ -22,19 +22,14 @@
       "@/components/*": ["components/*"],
       "@/styles/*" : ["styles/*"],
       "@/pages/*": ["pages/*"],
-      "@/services/*": ["services/*"],
-      "@/lib/*": ["lib/*"],
       "*": ["types/*.d.ts"],
       "@/helpers": ["helpers/*"]
     },
-    "types": ["jest", "node"]
+    "types": ["jest", "node", "@testing-library/jest-dom"]
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "out",
+    ".next"
   ]
 }

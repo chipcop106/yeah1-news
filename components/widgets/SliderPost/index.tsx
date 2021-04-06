@@ -84,13 +84,13 @@ const SliderPost: FC<PostProps> = ({
       }
     });
     slider.on('run.before', (evt) => {
-      //   setDisableButton('none');
+        setDisableButton('none');
     });
     slider.on('run.end', (evt) => {
-      //    setDisableButton('next');
+         setDisableButton('next');
     });
     slider.on('run.start', (evt) => {
-      // setDisableButton('prev');
+      setDisableButton('prev');
     });
     return cleanSlider;
   }, [posts]);

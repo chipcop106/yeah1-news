@@ -54,6 +54,7 @@ const Skin01: FC<PostProps> = ({ posts = [] }) => {
         }}
         spacing={2}
         alignItems={`stretch`}
+        maxH={`500px`}
       >
         <Box
           flexShrink={0}
@@ -75,7 +76,7 @@ const Skin01: FC<PostProps> = ({ posts = [] }) => {
               <Image
                 w={`100%`}
                 h={`100%`}
-                minH={`300`}
+                minH={`300px`}
                 src={posts[0].imageUrl}
                 fit={`cover`}
               />

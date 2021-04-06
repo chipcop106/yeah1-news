@@ -27,6 +27,8 @@ import { checkScrollReachBottom, vnSlugGenerator } from '../../helpers/utils';
 import { AiFillRead } from 'react-icons/ai';
 import { HorizontalCard } from '@/components/BlogCard';
 import { useEffect, useState } from 'react';
+import {initializeApollo} from "../../lib/apolloClient";
+import {ALL_CATEGORIES, GET_CONTENT_CATEGORY} from "../../services/GraphSchema";
 
 const demoData = [
   ...teenPosts.map((post) => ({
@@ -143,6 +145,51 @@ const Category = () => {
     </Box>
   );
 };
+
+export async function getStaticPaths() {
+  const apolloClient = initializeApollo();
+  const res = await apolloClient.query({
+    query: ALL_CATEGORIES,
+  });
+  const paths = res?.data?.categories.map((cat) => {
+    console.log({cat});
+    return {
+      params: {
+        slug: cat.slug
+      }
+    }
+  });
+  console.log({paths});
+  return {
+    paths,
+    fallback: false // See the "fallback" section below
+  };
+}
+
+export async function getStaticProps({ params }) {
+  const apolloClient = initializeApollo();
+  const resCategories = await apolloClient.query({
+    query: ALL_CATEGORIES,
+  });
+  const { categories } = resCategories.data;
+  const categoryId = categories.find(category => category.slug === params.slug).id;
+
+  await apolloClient.query({
+    query: GET_CONTENT_CATEGORY,
+    variables: {
+      where: {
+        categoryId
+      }
+    }
+  });
+
+  return {
+    props: {
+      initialApolloState: apolloClient.cache.extract(),
+    },
+    revalidate: 1
+  }
+}
 
 Category.layout = Layout;
 

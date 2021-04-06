@@ -43,6 +43,8 @@ import { MdOndemandVideo } from 'react-icons/md';
 import { GiBlackBook } from 'react-icons/gi';
 import { IoIosPeople } from 'react-icons/io';
 import { nanoid } from 'nanoid';
+import {useQuery} from "@apollo/client";
+import {ALL_CATEGORIES} from "../../services/GraphSchema";
 
 const menuLists = [
   {
@@ -145,6 +147,7 @@ const Styled = styled(Box)`
 `;
 
 const Header: FC = () => {
+  const { loading, error, data } = useQuery(ALL_CATEGORIES);
   const [showSearch, setShowSearch] = useState(false);
   const theme = useTheme();
   const router = useRouter();
@@ -168,6 +171,7 @@ const Header: FC = () => {
     }
   };
 
+
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
 
@@ -179,6 +183,8 @@ const Header: FC = () => {
   const _toggleSearchBar = () => {
     setShowSearch(!showSearch);
   };
+
+  if(loading) return <div>Loading...</div>
 
   return (
     <Styled
@@ -257,7 +263,7 @@ const Header: FC = () => {
             </Wrap>
             <Box>
               <RouteLink href={`/`}>
-                <Link pos={`relative`}>
+                <Link pos={`relative`} >
                   <Image
                     src={
                       colorMode === 'light'
@@ -328,7 +334,7 @@ const Header: FC = () => {
                   base: 4,
                 }}
               >
-                {menuLists.map((menu) => (
+                {data.categories.map((menu) => (
                   <WrapItem
                     width={{
                       md: `auto`,
@@ -340,12 +346,31 @@ const Header: FC = () => {
                       href={`/category/${menu.slug}`}
                       isActive={router.asPath === `/category/${menu.slug}`}
                     >
-                      <Box d={`inline-flex`} alignItems={`center`}>
-                        <Box as={`span`} mr={2}>
-                          {menu.icon}
-                        </Box>
+                      <Box
+                          py={2}
+                          d={`inline-flex`}
+                          alignItems={`center`}
+                         _after={{
+                        content: `''`,
+                        width: '100%',
+                        position: 'absolute',
+                        left: 0,
+                        bottom: 0,
+                        height: 1,
+                        opacity: router.asPath === `/category/${menu.slug}` ? 1 : 0,
+                        backgroundColor: theme.colors.secondary,
+                      }}
+                           _hover={{
+                             textDecoration: `none`,
+                             _after: {
+                               opacity: 1,
+                             },
+                           }}>
+                        {/*<Box as={`span`} mr={2}>*/}
+                        {/*  {menu.icon}*/}
+                        {/*</Box>*/}
 
-                        {menu.title}
+                        {menu.name}
                       </Box>
                     </NavLink>
                   </WrapItem>
