@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 import styled from '@emotion/styled';
 import {
   Image,
@@ -10,15 +10,10 @@ import {
   Stack,
   HStack,
   Tag,
-  Button,
   useColorMode,
   useBreakpointValue,
 } from '@chakra-ui/react';
 import { default as RouteLink } from 'next/link';
-import date from 'date-fns';
-import format from 'date-fns/format';
-
-const headingMarkups = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
 interface Post {
   id: string;
@@ -54,7 +49,7 @@ const Skin01: FC<PostProps> = ({ posts = [] }) => {
         }}
         spacing={2}
         alignItems={`stretch`}
-        maxH={`500px`}
+        maxH={{ md: `500px`, base: `100%` }}
       >
         <Box
           flexShrink={0}
@@ -76,7 +71,7 @@ const Skin01: FC<PostProps> = ({ posts = [] }) => {
               <Image
                 w={`100%`}
                 h={`100%`}
-                minH={`300px`}
+                minH={`400px`}
                 src={posts[0].imageUrl}
                 fit={`cover`}
               />
@@ -137,10 +132,10 @@ const Skin01: FC<PostProps> = ({ posts = [] }) => {
                   key={`${post.id}`}
                   pos={`relative`}
                   w={{ md: `100%`, sm: `50%`, base: `80%` }}
-                  h={{ md: `100%`, sm: 200, base: 175 }}
+                  h={{ md: `calc(50% - 0.25rem)`, sm: 200, base: 175 }}
                   flexShrink={{ md: 1, base: 0 }}
                 >
-                  <RouteLink href={`/article/slug`}>
+                  <RouteLink href={`/article/${post.slug}`}>
                     <Link
                       pos={`relative`}
                       display={`block`}

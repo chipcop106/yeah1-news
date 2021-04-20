@@ -1,97 +1,124 @@
+import { useCallback, useMemo } from 'react';
 import {
-  Avatar,
   Image,
-  Heading,
   Box,
   Divider,
-  ListItem,
-  UnorderedList,
-  ListIcon,
-  Text,
   Container,
   Stack,
   Button,
-  useColorMode,
   useBreakpointValue,
 } from '@chakra-ui/react';
 import Layout from '@/components/layout';
-import VisuallyHidden from '@reach/visually-hidden';
-import { CategoryTitle, GridPost } from '@/components/widgets';
-import {
-  bookPosts,
-  musicPosts,
-  socialPosts,
-  teenPosts,
-} from '../../data-sample';
-import { checkScrollReachBottom, vnSlugGenerator } from '../../helpers/utils';
-import { AiFillRead } from 'react-icons/ai';
-import { HorizontalCard } from '@/components/BlogCard';
-import { useEffect, useState } from 'react';
-import {initializeApollo} from "../../lib/apolloClient";
-import {ALL_CATEGORIES, GET_CONTENT_CATEGORY} from "../../services/GraphSchema";
 
-const demoData = [
-  ...teenPosts.map((post) => ({
-    ...post,
-    slug: vnSlugGenerator(post.title),
-  })),
-  ...musicPosts.map((post) => ({
-    ...post,
-    slug: vnSlugGenerator(post.title),
-  })),
-];
+import { CategoryTitle, GridPost } from '@/components/widgets';
+
+import { formatUnixDate } from '../../helpers/utils';
+import { HorizontalCard } from '@/components/BlogCard';
+import { useEffect } from 'react';
+import { initializeApollo } from '../../lib/apolloClient';
+import { ALL_CATEGORIES, GET_POSTS } from '../../services/GraphSchema';
+import { useQuery } from '@apollo/client';
+import { useRouter } from 'next/router';
+import dayjs from 'dayjs';
+import useScrollBottom from '@/hooks/useScrollBottom';
 
 const Category = () => {
-  const { colorMode } = useColorMode();
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { isReachBottom } = useScrollBottom();
+  const { slug } = router.query;
   const headingSizes = useBreakpointValue({
     base: 'sm',
     sm: 'sm',
     md: 'md',
   });
+  const { data: catData } = useQuery(ALL_CATEGORIES);
 
-  const loadmoreRelatedPost = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-  };
+  const category = useMemo(
+    () => catData.categories.find((cat) => cat.slug === slug),
+    [catData]
+  );
+  const { loading, data, fetchMore } = useQuery(GET_POSTS, {
+    variables: {
+      where: {
+        categoryId: category.id,
+      },
+      limit: 20,
+      start: 0,
+      command: `category:${category.id}`,
+    },
+    notifyOnNetworkStatusChange: true,
+  });
 
-  const handleScroll = () => {
-    const isReachBottom = checkScrollReachBottom();
-    isReachBottom && loadmoreRelatedPost();
-  };
+  const loadmoreRelatedPost = useCallback(() => {
+    fetchMore({
+      variables: {
+        where: {
+          categoryId: category.id,
+        },
+        limit: 10,
+        start: data.getPosts.length + 20,
+      },
+    });
+  }, [isReachBottom]);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
+    loadmoreRelatedPost();
+  }, [isReachBottom]);
 
-    return () => {
-      window.removeEventListener('scroll', () => handleScroll);
-    };
-  }, []);
   return (
     <Box flexGrow={1}>
       <Container maxW="1170px" as={`section`} mb={8} id={`featured-post`}>
         <CategoryTitle
-          title={`Giới trẻ`}
+          title={category.name}
           skin={`Skin02`}
           headingProps={{
             as: `h1`,
             size: `lg`,
           }}
         />
-        <GridPost loading={false} posts={demoData} skin={`Skin02`} />
+        {!loading && (
+          <GridPost
+            loading={loading}
+            posts={data.getPosts
+              .filter((p, i) => i < 10)
+              .map((post) => ({
+                ...post,
+                imageUrl: post.images[0]?.src ?? post.extra_info.image,
+                category: category.name,
+                publishDate:
+                  post.extra_info.date_published !== null
+                    ? formatUnixDate(post.extra_info.date_published / 1000)
+                    : dayjs(new Date(post.createdAt)).format(
+                        'dddd, DD/MM/YYYY'
+                      ),
+              }))}
+            skin={`Skin02`}
+          />
+        )}
       </Container>
       <Container maxW={`1170px`} as={`section`} mt={12}>
         <Divider mb={12} />
         <Stack direction={{ base: 'column-reverse', md: 'row' }} spacing={8}>
           <Box flexGrow={1}>
             <Box>
-              {demoData.map((post, index) =>
-                index === socialPosts.length - 1 ? (
-                  <Box key={`${index}`}>
+              {data.getPosts
+                .filter((p, i) => i >= 10)
+                .map((post, index) => (
+                  <Box mb={6} key={`${index}`}>
                     <HorizontalCard
-                      post={{ ...post, slug: vnSlugGenerator(post.title) }}
+                      post={{
+                        ...post,
+                        imageUrl: post.images[0]?.src ?? post.extra_info.image,
+                        category: category.name,
+                        publishDate:
+                          post.extra_info.date_published !== null
+                            ? formatUnixDate(
+                                post.extra_info.date_published / 1000
+                              )
+                            : dayjs(new Date(post.createdAt)).format(
+                                'dddd, DD/MM/YYYY'
+                              ),
+                      }}
                       showCategory={true}
                       headingProps={{
                         size: headingSizes,
@@ -99,26 +126,14 @@ const Category = () => {
                       }}
                     />
                   </Box>
-                ) : (
-                  <Box mb={8} key={`${index}`}>
-                    <HorizontalCard
-                      post={{ ...post, slug: vnSlugGenerator(post.title) }}
-                      showCategory={true}
-                      headingProps={{
-                        size: headingSizes,
-                        as: `h3`,
-                      }}
-                    />
-                  </Box>
-                )
-              )}
-              {isLoading && (
+                ))}
+              {loading && (
                 <Box align={`center`} mt={8}>
                   <Button
                     variant={`solid`}
                     colorScheme={`gray`}
                     onClick={loadmoreRelatedPost}
-                    isLoading={isLoading}
+                    isLoading={loading}
                     loadingText="Đang tải bài viết..."
                   >
                     Xem thêm bài viết mới
@@ -152,17 +167,15 @@ export async function getStaticPaths() {
     query: ALL_CATEGORIES,
   });
   const paths = res?.data?.categories.map((cat) => {
-    console.log({cat});
     return {
       params: {
-        slug: cat.slug
-      }
-    }
+        slug: cat.slug,
+      },
+    };
   });
-  console.log({paths});
   return {
     paths,
-    fallback: false // See the "fallback" section below
+    fallback: false, // See the "fallback" section below
   };
 }
 
@@ -172,23 +185,35 @@ export async function getStaticProps({ params }) {
     query: ALL_CATEGORIES,
   });
   const { categories } = resCategories.data;
-  const categoryId = categories.find(category => category.slug === params.slug).id;
+  const categoryId = categories.find(
+    (category) => category.slug === params.slug
+  ).id;
 
-  await apolloClient.query({
-    query: GET_CONTENT_CATEGORY,
+  const res = await apolloClient.query({
+    query: GET_POSTS,
     variables: {
       where: {
-        categoryId
-      }
-    }
+        categoryId,
+      },
+      limit: 20,
+      start: 0,
+      command: `category:${categoryId}`,
+    },
   });
+
+  if (!res.data.getPosts) {
+    return {
+      notFound: true,
+    };
+  }
 
   return {
     props: {
       initialApolloState: apolloClient.cache.extract(),
+      key: params.slug,
     },
-    revalidate: 1
-  }
+    revalidate: 1,
+  };
 }
 
 Category.layout = Layout;

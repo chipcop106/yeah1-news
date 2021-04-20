@@ -1,4 +1,4 @@
-import { Stack, IconButton, useColorMode } from '@chakra-ui/react';
+import { IconButton, useColorMode } from '@chakra-ui/react';
 import { FC, useEffect } from 'react';
 import '@glidejs/glide/dist/css/glide.core.min.css';
 import '@glidejs/glide/dist/css/glide.theme.min.css';
@@ -84,10 +84,10 @@ const SliderPost: FC<PostProps> = ({
       }
     });
     slider.on('run.before', (evt) => {
-        setDisableButton('none');
+      setDisableButton('none');
     });
     slider.on('run.end', (evt) => {
-         setDisableButton('next');
+      setDisableButton('next');
     });
     slider.on('run.start', (evt) => {
       setDisableButton('prev');

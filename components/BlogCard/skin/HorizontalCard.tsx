@@ -10,6 +10,8 @@ import {
 } from '@chakra-ui/react';
 import { AiOutlinePlayCircle } from 'react-icons/ai';
 import { default as RouteLink } from 'next/link';
+import Skeleton from 'react-loading-skeleton';
+import LazyLoad from 'react-lazyload';
 
 export interface Post {
   id: string;
@@ -65,17 +67,18 @@ const HorizontalCard: FC<CardProps> = ({
       >
         <RouteLink href={`/article/${post.slug}`}>
           <Link pos={`relative`} display={`block`} pb={`72%`}>
-            <Box
-              as={`span`}
-              pos={`absolute`}
-              w={`100%`}
-              h={`100%`}
-              bgPosition={`center 50%`}
-              bgSize={`cover`}
-              bgImage={`url('${post.imageUrl}')`}
-              className={`post-image`}
-            />
-
+            <LazyLoad once>
+              <Box
+                as={`span`}
+                pos={`absolute`}
+                w={`100%`}
+                h={`100%`}
+                bgPosition={`center 50%`}
+                bgSize={`cover`}
+                bgImage={`url('${post.imageUrl}')`}
+                className={`post-image`}
+              />
+            </LazyLoad>
             {type === 'video' && (
               <Box
                 pos={`absolute`}
@@ -100,7 +103,7 @@ const HorizontalCard: FC<CardProps> = ({
               {...headingProps}
               data-testid="title"
             >
-              {post.title}
+              {post.title || <Skeleton />}
             </Heading>
           </Link>
         </RouteLink>
@@ -114,7 +117,7 @@ const HorizontalCard: FC<CardProps> = ({
               colorScheme="brand"
               data-testid="category"
             >
-              {post.category}
+              {post.category || <Skeleton />}
             </Tag>
           )}
 
@@ -131,7 +134,7 @@ const HorizontalCard: FC<CardProps> = ({
             noOfLines={2}
             data-testid="description"
           >
-            {post.description}
+            {post.description || <Skeleton count={3} />}
           </Text>
         )}
       </Box>

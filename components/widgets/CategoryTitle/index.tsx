@@ -1,14 +1,5 @@
-import {
-  Heading,
-  HStack,
-  HeadingProps,
-  Box,
-  Divider,
-  useColorMode,
-} from '@chakra-ui/react';
+import { HeadingProps } from '@chakra-ui/react';
 import { FC, ReactNode } from 'react';
-import { IoFolderOutline } from 'react-icons/io5';
-import styled from '@emotion/styled';
 import { Skin01, Skin02 } from './skin';
 
 const templates = {

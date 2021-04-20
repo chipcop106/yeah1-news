@@ -1,9 +1,6 @@
 import { FC, ReactNode } from 'react';
-import { Link, useTheme, Box, Stack } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 import { default as RouteLink } from 'next/link';
-import styled from '@emotion/styled';
-import theme from '@/styles/theme';
-import { HiOutlineMenu } from 'react-icons/all';
 
 interface NavLinkProps {
   isActive: boolean;
@@ -12,7 +9,6 @@ interface NavLinkProps {
 }
 
 const NavLink: FC<NavLinkProps> = (props) => {
-  const theme = useTheme();
   return (
     <RouteLink href={props.href}>
       <Box
@@ -21,7 +17,6 @@ const NavLink: FC<NavLinkProps> = (props) => {
         alignItems={`center`}
         px={6}
         style={{ cursor: `pointer` }}
-
       >
         {props.children}
       </Box>

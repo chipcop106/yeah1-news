@@ -3,7 +3,6 @@ import {
   HStack,
   HeadingProps,
   Box,
-  Divider,
   useColorMode,
 } from '@chakra-ui/react';
 import { FC, ReactNode } from 'react';

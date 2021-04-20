@@ -1,21 +1,11 @@
 import { Container, Divider } from '@chakra-ui/react';
 import VisuallyHidden from '@reach/visually-hidden';
 import { GridPost } from '@/components/widgets';
-import {useQuery} from "@apollo/client";
-import {ALL_CATEGORIES, GET_LASTED_POST} from "@/services/GraphSchema";
-import {formatUnixDate} from "../../helpers/utils";
+import { formatUnixDate } from '../../helpers/utils';
+import dayjs from 'dayjs';
 
-const FeaturedSection = () => {
-  const { data:catsData } = useQuery(ALL_CATEGORIES);
-  const { loading, error, data } = useQuery(GET_LASTED_POST, {
-    variables: {
-      sort: "createAt:DESC",
-      limit: 3
-    }
-  });
-
-
-  if(loading) return <div>Loading...</div>
+const FeaturedSection = ({ loading, data }) => {
+  if (loading) return <div>Loading...</div>;
   return (
     <Container maxW="1170px" as={`section`} mb={8} id={`featured-post`}>
       <VisuallyHidden>
@@ -23,17 +13,18 @@ const FeaturedSection = () => {
       </VisuallyHidden>
       <GridPost
         loading={false}
-        posts={data.getLastedPost.map(post => {
-          const category = catsData.categories.find(cat => {
-            const matches = cat.tags.filter(tag => tag.id === post.content_tags[0])
-            return matches.length > 0;
-          });
+        posts={data.map((post) => {
           return {
             ...post,
             imageUrl: post.images[0]?.src ?? post.extra_info.image,
-            category: category ? category.name : 'Khác',
-            publishDate: formatUnixDate(post.extra_info.date_published / 1000),
-          }
+            category: post.extra_info.category
+              ? post.extra_info.category.name
+              : 'Khác',
+            publishDate:
+              post.extra_info.date_published !== null
+                ? formatUnixDate(post.extra_info.date_published / 1000)
+                : dayjs(new Date(post.createdAt)).format('DD/MM/YYYY'),
+          };
         })}
       />
       <Divider mt={8} />

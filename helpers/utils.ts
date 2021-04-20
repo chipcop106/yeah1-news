@@ -1,7 +1,21 @@
-import { fromUnixTime, format } from 'date-fns'
-import {default as vnLocale} from 'date-fns/locale/vi'
+import dayjs from 'dayjs';
+import updateLocale from 'dayjs/plugin/updateLocale';
+require('dayjs/locale/vi');
+dayjs.extend(updateLocale);
 
+const localeConfig = {
+  weekdays: [
+    'Chủ nhật',
+    'Thứ hai',
+    'Thứ ba',
+    'Thứ tư',
+    'Thứ năm',
+    'Thứ sáu',
+    'Thứ bảy',
+  ],
+};
 
+dayjs.updateLocale('vi', localeConfig);
 
 export const vnSlugGenerator = (str: string, separator: string = '-') => {
   str = str
@@ -48,8 +62,17 @@ export async function fetchAPI(path) {
   return data;
 }
 
-export const formatUnixDate = (unixTime, customFormat = 'EEEE, dd/MM/yyyy') => {
-  if(isNaN(unixTime)) return '';
-  const date = fromUnixTime(unixTime);
-  return format(date, customFormat, { locale: vnLocale })
-}
+export const formatUnixDate = (
+  unixTime: number,
+  customFormat = 'DD/MM/YYYY'
+) => {
+  if (isNaN(unixTime)) return '';
+  return dayjs.unix(unixTime).locale('vi').format(customFormat);
+};
+
+export const mergePostQuery = (prev: any, { fetchMoreResult }) => {
+  if (!fetchMoreResult) return prev;
+  return Object.assign({}, prev, {
+    getPosts: [...prev.getPosts, ...fetchMoreResult.getPosts],
+  });
+};

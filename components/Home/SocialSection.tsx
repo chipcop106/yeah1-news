@@ -10,28 +10,16 @@ import {
 import CategoryTitle from '../widgets/CategoryTitle';
 import { IoPeopleOutline } from 'react-icons/io5';
 import { HorizontalCard } from '@/components/BlogCard';
-import {GET_CONTENT_CATEGORY} from "../../services/GraphSchema";
-import { useQuery } from '@apollo/client';
-import {formatUnixDate} from "../../helpers/utils";
+import { formatUnixDate } from '../../helpers/utils';
+import dayjs from 'dayjs';
 
-const SocialSection = () => {
+const SocialSection = ({ loading, data }) => {
   const { colorMode } = useColorMode();
   const headingSizes = useBreakpointValue({
     base: 'sm',
     sm: 'sm',
     md: 'md',
   });
-
-  const { loading, error, data } = useQuery(GET_CONTENT_CATEGORY, {
-    variables: {
-      where: {
-        categoryId: '60629fc0f6a2c23fb4daec5f'
-      },
-      sort: "createAt:DESC",
-      limit: 10
-    }
-  });
-  if(loading) return <div>Loading...</div>
 
   return (
     <Container maxW="1170px" as={`section`} mb={8}>
@@ -51,9 +39,11 @@ const SocialSection = () => {
               fontWeight: `light`,
             }}
           />
-          {data.getLastedPost.map((post, index) =>
-            index === data.getLastedPost.length - 1 ? (
-              <Box key={`${index}`}>
+          {loading ? (
+            <div>Loading...</div>
+          ) : (
+            data.map((post, index) => (
+              <Box mb={index === data.length - 1 ? 0 : 6} key={`${index}`}>
                 <HorizontalCard
                   post={{
                     id: post.id,
@@ -61,8 +51,11 @@ const SocialSection = () => {
                     imageUrl: post?.extra_info?.image ?? post.images[0].src,
                     category: 'Xã hội',
                     description: post.description || post.extra_info.dek,
-                    publishDate: formatUnixDate(post.extra_info.date_published / 1000),
-                    slug: post.slug
+                    publishDate:
+                      post.extra_info.date_published !== null
+                        ? formatUnixDate(post.extra_info.date_published / 1000)
+                        : dayjs(new Date(post.createdAt)).format('DD/MM/YYYY'),
+                    slug: post.slug,
                   }}
                   showCategory={true}
                   headingProps={{
@@ -71,26 +64,7 @@ const SocialSection = () => {
                   }}
                 />
               </Box>
-            ) : (
-              <Box mb={8} key={`${index}`}>
-                <HorizontalCard
-                  post={{
-                    id: post.id,
-                    title: post.title,
-                    imageUrl: post?.extra_info?.image ?? post.images[0].src,
-                    category: 'Xã hội',
-                    description: post.description || post.extra_info.dek,
-                    publishDate: formatUnixDate(post.extra_info.date_published / 1000),
-                    slug: post.slug
-                  }}
-                  showCategory={true}
-                  headingProps={{
-                    size: headingSizes,
-                    as: `h3`,
-                  }}
-                />
-              </Box>
-            )
+            ))
           )}
         </Box>
         <Box

@@ -25,9 +25,11 @@
       "@/services/*": ["services/*"],
       "@/lib/*": ["lib/*"],
       "*": ["types/*.d.ts"],
-      "@/helpers": ["helpers/*"]
+      "@/helpers/*": ["helpers/*"],
+      "@/hooks/*": ["hooks/*"]
     },
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "next-env.d.ts",

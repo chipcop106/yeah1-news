@@ -1,24 +1,17 @@
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 import styled from '@emotion/styled';
 import {
   Image,
   Link,
   Box,
-  useTheme,
   Text,
   Heading,
   Stack,
   HStack,
   Tag,
-  Button,
-  useColorMode,
 } from '@chakra-ui/react';
 import { default as RouteLink } from 'next/link';
-import date from 'date-fns';
-import format from 'date-fns/format';
 import { HorizontalCard } from '@/components/BlogCard';
-
-const headingMarkups = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
 interface Post {
   id: string;
@@ -42,10 +35,12 @@ interface PostProps {
 const FeaturedStyle = styled.div``;
 
 const GridPost: FC<PostProps> = ({ posts = [], loading, limit = 10 }) => {
-  const theme = useTheme();
-  const { colorMode } = useColorMode();
-
-  //if (posts.length === 0) return <Text color={`red.500`}>No posts found</Text>;
+  if (posts.length === 0)
+    return (
+      <Text color={`red.500`} textAlign="center">
+        No posts found
+      </Text>
+    );
   return (
     <FeaturedStyle>
       <Stack direction={`column`} spacing={4} alignItems={`stretch`}>
