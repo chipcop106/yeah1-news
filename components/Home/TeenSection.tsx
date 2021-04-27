@@ -39,7 +39,7 @@ const TeenSection = ({ loading, data }) => {
             posts={data.map((post) => ({
               ...post,
               imageUrl: post.images[0]?.src ?? post.extra_info.image,
-              category: 'Giới trẻ',
+              category: post.extra_info.category?.name ?? 'Khác',
               publishDate:
                 post.extra_info.date_published !== null
                   ? formatUnixDate(post.extra_info.date_published / 1000)

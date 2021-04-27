@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../AppNews/crawler-news/.idea/crawler-news.iml" filepath="$PROJECT_DIR$/../AppNews/crawler-news/.idea/crawler-news.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../AppNews/strapi-graph/.idea/strapi-graph.iml" filepath="$PROJECT_DIR$/../AppNews/strapi-graph/.idea/strapi-graph.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/yeah1-news.iml" filepath="$PROJECT_DIR$/.idea/yeah1-news.iml" />
     </modules>
   </component>

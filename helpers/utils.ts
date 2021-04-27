@@ -69,10 +69,3 @@ export const formatUnixDate = (
   if (isNaN(unixTime)) return '';
   return dayjs.unix(unixTime).locale('vi').format(customFormat);
 };
-
-export const mergePostQuery = (prev: any, { fetchMoreResult }) => {
-  if (!fetchMoreResult) return prev;
-  return Object.assign({}, prev, {
-    getPosts: [...prev.getPosts, ...fetchMoreResult.getPosts],
-  });
-};

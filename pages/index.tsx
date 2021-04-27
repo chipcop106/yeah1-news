@@ -8,9 +8,7 @@ import FeaturedSection from '@/components/Home/FeaturedSection';
 import LastedPostSection from '@/components/Home/LastedPostSection';
 // import SportSection from '@/components/Home/SportSection';
 // import ThreeColumnSection from '@/components/Home/ThreeColumnSection';
-import { mergePostQuery } from '@/helpers/utils';
 import dynamic from 'next/dynamic';
-import { Spinner } from '@chakra-ui/react';
 
 const SocialSection = dynamic(() => import('@/components/Home/SocialSection'));
 const TeenSection = dynamic(() => import('@/components/Home/TeenSection'));
@@ -48,7 +46,7 @@ const Home = () => {
         type: 'video',
       },
       sort: 'createAt:DESC',
-      limit: 6,
+      limit: 7,
       start: 0,
     },
   });
@@ -58,6 +56,7 @@ const Home = () => {
       where: {
         categoryId: TEEN_ID,
       },
+      command: TEEN_ID,
       sort: 'createAt:DESC',
       limit: 24,
     },
@@ -68,6 +67,7 @@ const Home = () => {
       where: {
         categoryId: SOCIAL_ID,
       },
+      command: SOCIAL_ID,
       sort: 'createAt:DESC',
       limit: 10,
       start: 0,
@@ -91,6 +91,7 @@ const Home = () => {
           categoryId: SPORT_ID,
           type: 'video',
         },
+        command: SPORT_ID,
         limit: 5,
         start: 0,
       },
@@ -104,7 +105,9 @@ const Home = () => {
         where: {
           categoryId: LIFE_ID,
         },
+        command: LIFE_ID,
         limit: 5,
+        start: 0,
       },
     }
   );
@@ -117,10 +120,12 @@ const Home = () => {
       where: {
         categoryId: FINANCE_ID,
       },
+      command: FINANCE_ID,
       limit: 5,
+      start: 0,
     },
   });
-  console.log({ financeData });
+
   const {
     loading: healthLoading,
     error: healthError,
@@ -131,8 +136,11 @@ const Home = () => {
         categoryId: HEALTH_ID,
       },
       limit: 5,
+      command: HEALTH_ID,
+      start: 0,
     },
   });
+  console.log({ financeData, healthData, lifeData });
 
   return (
     <>
@@ -201,7 +209,7 @@ export async function getStaticProps() {
         type: 'video',
       },
       sort: 'createAt:DESC',
-      limit: 6,
+      limit: 7,
       start: 0,
     },
   });
@@ -222,6 +230,7 @@ export async function getStaticProps() {
       },
       sort: 'createAt:DESC',
       limit: 24,
+      start: 0,
     },
   });
 
@@ -265,7 +274,9 @@ export async function getStaticProps() {
       where: {
         categoryId: LIFE_ID,
       },
+      command: LIFE_ID,
       limit: 5,
+      start: 0,
     },
   });
   await apolloClient.query({
@@ -274,7 +285,9 @@ export async function getStaticProps() {
       where: {
         categoryId: FINANCE_ID,
       },
+      command: FINANCE_ID,
       limit: 5,
+      start: 0,
     },
   });
   await apolloClient.query({
@@ -283,7 +296,9 @@ export async function getStaticProps() {
       where: {
         categoryId: HEALTH_ID,
       },
+      command: HEALTH_ID,
       limit: 5,
+      start: 0,
     },
   });
 

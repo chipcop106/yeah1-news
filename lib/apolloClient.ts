@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
 import { getStrapiURL } from '../helpers/utils';
-import { concatPagination } from '@apollo/client/utilities';
 
 let apolloClient;
 
@@ -16,11 +15,11 @@ function createApolloClient() {
         Query: {
           fields: {
             getPosts: {
-              keyArgs: ['command'],
+              keyArgs: ['command', 'where'],
               merge(
                 existing: any[],
                 incoming: any[],
-                { args: { start = 0, limit = 10 } }
+                { args: { start = 0, limit = 10, ...res } }
               ) {
                 const merged = existing ? existing.slice(0) : [];
                 // Insert the incoming elements in the right places, according to args.
