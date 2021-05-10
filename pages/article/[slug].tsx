@@ -19,7 +19,6 @@ import { FaBookReader } from 'react-icons/fa';
 import {
   checkScrollReachBottom,
   formatUnixDate,
-  mergePostQuery,
   vnSlugGenerator,
 } from '../../helpers/utils';
 import { HorizontalCard } from '@/components/BlogCard';
@@ -60,8 +59,9 @@ const Article = () => {
     {
       variables: {
         where: {
-          categoryId: postData.content.extra_info?.category?.id ?? '',
+          content_tags_in: postData.content.content_tags,
         },
+        command: `contenttag:${JSON.stringify(postData.content_tags)}`,
         limit: 10,
         start: 0,
       },
@@ -75,8 +75,12 @@ const Article = () => {
         where: {
           content_tags_in: postData.content.content_tags,
         },
+        command: `contenttag:${JSON.stringify(postData.content_tags)}`,
         limit: 10,
-        start: relatedData.getPosts.length + 10,
+        start:
+          relatedData && !!relatedData.getPosts
+            ? relatedData.getPosts.length
+            : 0,
       },
     });
   }, [isReachBottom]);
@@ -110,10 +114,13 @@ const Article = () => {
             where: {
               categoryId: article.extra_info.category.id,
             },
+            command: `category:${article.extra_info.category.id}`,
             limit: 10,
-            start: offset,
+            start:
+              relatedData && !!relatedData.getPosts
+                ? relatedData.getPosts.length
+                : 0,
           },
-          updateQuery: mergePostQuery,
         });
       } catch (e) {
         console.log({ e });
@@ -276,7 +283,8 @@ const Article = () => {
                 }}
               />
               <Box>
-                {relatedData.getPosts &&
+                {relatedData &&
+                  relatedData.getPosts &&
                   relatedData.getPosts.length &&
                   relatedData.getPosts
                     .filter((p) => p.slug !== postData.content.slug)
@@ -366,6 +374,7 @@ export async function getServerSideProps({ params }) {
       where: {
         categoryId: article.extra_info.category.id,
       },
+      command: `category:${article.extra_info.category.id}`,
       limit: 10,
       start: 0,
     },
