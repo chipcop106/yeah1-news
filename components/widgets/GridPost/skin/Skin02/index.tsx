@@ -1,22 +1,17 @@
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 import styled from '@emotion/styled';
 import {
   Image,
   Link,
   Box,
-  useTheme,
   Text,
   Heading,
   Stack,
   HStack,
   Tag,
-  Button,
-  useColorMode,
-  useBreakpointValue,
 } from '@chakra-ui/react';
 import { default as RouteLink } from 'next/link';
-import date from 'date-fns';
-import format from 'date-fns/format';
+
 import { HorizontalCard } from '@/components/BlogCard';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import 'react-perfect-scrollbar/dist/css/styles.css';
@@ -41,9 +36,6 @@ interface PostProps {
 const FeaturedStyle = styled.div``;
 
 const Skin02: FC<PostProps> = ({ posts = [] }) => {
-  const theme = useTheme();
-  const { colorMode } = useColorMode();
-  const headingSizes = useBreakpointValue({ md: `md`, base: `sm` });
   if (posts.length === 0) return <Text color={`red.500`}>No posts found</Text>;
   return (
     <FeaturedStyle>
@@ -54,6 +46,7 @@ const Skin02: FC<PostProps> = ({ posts = [] }) => {
         }}
         spacing={2}
         alignItems={`stretch`}
+        maxH={{ md: `500px`, base: `100%` }}
       >
         <Box
           flexShrink={0}

@@ -1,14 +1,9 @@
 import {
-  Avatar,
   Image,
   Heading,
   Box,
   Divider,
-  ListItem,
-  UnorderedList,
-  ListIcon,
   Text,
-  Img,
   Container,
   HStack,
   useColorMode,
@@ -16,79 +11,133 @@ import {
   Link,
   Stack,
   Button,
-  useBreakpointValue, Spinner,
+  useBreakpointValue,
+  Spinner,
 } from '@chakra-ui/react';
 import Layout from '@/components/layout';
 import { FaBookReader } from 'react-icons/fa';
-import { socialPosts, trendingPosts } from '../../data-sample';
-import {checkScrollReachBottom, formatUnixDate, vnSlugGenerator} from '../../helpers/utils';
+import {
+  checkScrollReachBottom,
+  formatUnixDate,
+  vnSlugGenerator,
+} from '../../helpers/utils';
 import { HorizontalCard } from '@/components/BlogCard';
 import CategoryTitle from '../../components/widgets/CategoryTitle';
-import { IoPeopleOutline, IoTimerOutline } from 'react-icons/io5';
 import { AiFillRead } from 'react-icons/ai';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { NextSeo } from 'next-seo';
-import {initializeApollo} from "../../lib/apolloClient";
-import { GET_POST, ALL_CATEGORIES } from '@/services/GraphSchema';
-import {nanoid} from "nanoid";
-import { useRouter } from 'next/router'
-import {useQuery} from "@apollo/client";
+import { initializeApollo } from '../../lib/apolloClient';
+import { GET_POST, ALL_CATEGORIES, GET_POSTS } from '@/services/GraphSchema';
+import { useRouter } from 'next/router';
+import { useQuery } from '@apollo/client';
+import dayjs from 'dayjs';
+import useScrollBottom from '@/hooks/useScrollBottom';
 
-const Article = ({ relatedArticles }) => {
+const Article = () => {
   const router = useRouter();
   const { colorMode } = useColorMode();
+  const { isReachBottom } = useScrollBottom();
+  const [offset, setOffset] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
   const headingSizes = useBreakpointValue({
     base: 'sm',
     sm: 'sm',
     md: 'md',
   });
-  const {loading:postLoading, error:postError, data:postData} = useQuery( GET_POST,{
-    variables: {
-      id: router.query.slug
+  const { loading: postLoading, error: postError, data: postData } = useQuery(
+    GET_POST,
+    {
+      variables: {
+        id: router.query.slug,
+        command: 'web',
+      },
     }
-  });
-  const {loading:categoriesLoading, error:categoriesError, data:categoriesData} = useQuery(ALL_CATEGORIES);
+  );
 
+  const { loading: relatedLoading, data: relatedData, fetchMore } = useQuery(
+    GET_POSTS,
+    {
+      variables: {
+        where: {
+          content_tags_in: postData.content.content_tags,
+        },
+        command: `contenttag:${JSON.stringify(postData.content_tags)}`,
+        limit: 10,
+        start: 0,
+      },
+      notifyOnNetworkStatusChange: true,
+    }
+  );
 
-
-  const loadmoreRelatedPost = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-  };
-
-  const handleScroll = () => {
-    const isReachBottom = checkScrollReachBottom();
-    isReachBottom && loadmoreRelatedPost();
-  };
+  const loadmoreRelatedPost = useCallback(() => {
+    fetchMore({
+      variables: {
+        where: {
+          content_tags_in: postData.content.content_tags,
+        },
+        command: `contenttag:${JSON.stringify(postData.content_tags)}`,
+        limit: 10,
+        start:
+          relatedData && !!relatedData.getPosts
+            ? relatedData.getPosts.length
+            : 0,
+      },
+    });
+  }, [isReachBottom]);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
+    loadmoreRelatedPost();
+  }, [isReachBottom]);
 
-    return () => {
-      window.removeEventListener('scroll', () => handleScroll);
-    };
-  }, []);
+  if (postLoading)
+    return (
+      <Stack
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        flexGrow={1}
+        height="100vh"
+      >
+        <Spinner size="xl" />
+      </Stack>
+    );
 
+  if (!postData) return null;
+  const article = useMemo(() => postData.content, [postData]);
+  console.log({ article });
 
-  if (postLoading || categoriesLoading) return <Stack direction="column" alignItems="center" justifyContent="center" flexGrow={1} height="100vh">
-    <Spinner size="xl" />
-  </Stack>;
-
-  const article = {
-    ...postData.content,
-    category: categoriesData.categories.find(item => item.tags.find(tag => tag.id === postData.content.content_tags[0]))
-  };
-
+  useEffect(() => {
+    if (article) {
+      try {
+        fetchMore({
+          variables: {
+            where: {
+              categoryId: article.extra_info.category.id,
+            },
+            command: `category:${article.extra_info.category.id}`,
+            limit: 10,
+            start:
+              relatedData && !!relatedData.getPosts
+                ? relatedData.getPosts.length
+                : 0,
+          },
+        });
+      } catch (e) {
+        console.log({ e });
+      }
+    }
+  }, [offset]);
   return (
     <>
       <NextSeo
         title={article.title}
         description={article.description}
         openGraph={{
-          url: `${process.env.BASE_URL ? process.env.BASE_URL : 'http://localhost:3000'}/article/${article.slug}`,
+          url: `${
+            process.env.BASE_URL
+              ? process.env.BASE_URL
+              : 'http://localhost:3000'
+          }/article/${article.slug}`,
           title: article.title,
           description: article.description,
           images: [
@@ -101,6 +150,7 @@ const Article = ({ relatedArticles }) => {
           ],
         }}
       />
+
       <Box flexGrow={1} py={12}>
         <Container maxW={`1170px`} as={`section`}>
           <Stack
@@ -156,7 +206,7 @@ const Article = ({ relatedArticles }) => {
                   variant="solid"
                   colorScheme="brand"
                 >
-                  {article?.category?.name ?? 'Khác'}
+                  {article.extra_info?.category?.name ?? 'Khác'}
                 </Tag>
                 <Text color={`gray.500`} fontSize={`sm`}>
                   {article?.publishDate}
@@ -207,7 +257,9 @@ const Article = ({ relatedArticles }) => {
               bgPosition={`center 50%`}
               bgSize={`cover`}
               borderRadius={16}
-              bgImage={`url('${article?.imageUrl ?? article.extra_info.image}')`}
+              bgImage={`url('${
+                article?.imageUrl ?? article.extra_info.image
+              }')`}
             ></Box>
           </Stack>
         </Container>
@@ -231,38 +283,46 @@ const Article = ({ relatedArticles }) => {
                 }}
               />
               <Box>
-                {relatedArticles.map((post, index) =>
-                  index === socialPosts.length - 1 ? (
-                    <Box key={`${index}`}>
-                      <HorizontalCard
-                        post={{ ...post, slug: vnSlugGenerator(post.title) }}
-                        showCategory={true}
-                        headingProps={{
-                          size: headingSizes,
-                          as: `h3`,
-                        }}
-                      />
-                    </Box>
-                  ) : (
-                    <Box mb={8} key={`${index}`}>
-                      <HorizontalCard
-                        post={{ ...post, slug: vnSlugGenerator(post.title) }}
-                        showCategory={true}
-                        headingProps={{
-                          size: headingSizes,
-                          as: `h3`,
-                        }}
-                      />
-                    </Box>
-                  )
-                )}
-                {isLoading && (
+                {relatedData &&
+                  relatedData.getPosts &&
+                  relatedData.getPosts.length &&
+                  relatedData.getPosts
+                    .filter((p) => p.slug !== postData.content.slug)
+                    .map((post, index) => (
+                      <Box
+                        mb={index === relatedData.getPosts.length - 1 ? 0 : 6}
+                        key={`${index}`}
+                      >
+                        <HorizontalCard
+                          post={{
+                            ...post,
+                            imageUrl:
+                              post.images[0]?.src ?? post.extra_info.image,
+                            category: post.extra_info.category.name,
+                            publishDate:
+                              post.extra_info.date_published !== null
+                                ? formatUnixDate(
+                                    post.extra_info.date_published / 1000
+                                  )
+                                : dayjs(new Date(post.createdAt)).format(
+                                    'dddd, DD/MM/YYYY'
+                                  ),
+                          }}
+                          showCategory={true}
+                          headingProps={{
+                            size: headingSizes,
+                            as: `h3`,
+                          }}
+                        />
+                      </Box>
+                    ))}
+                {relatedLoading && (
                   <Box align={`center`} mt={8}>
                     <Button
                       variant={`solid`}
                       colorScheme={`gray`}
                       onClick={loadmoreRelatedPost}
-                      isLoading={isLoading}
+                      isLoading={relatedLoading}
                       loadingText="Đang tải bài viết..."
                     >
                       Xem thêm bài viết mới
@@ -293,28 +353,39 @@ const Article = ({ relatedArticles }) => {
 
 export async function getServerSideProps({ params }) {
   const apolloClient = initializeApollo();
+
   const res = await apolloClient.query({
     query: GET_POST,
     variables: {
-      id: params.slug
-    }
+      id: params.slug,
+    },
   });
+
   const article = res.data.content;
-  if (!article) {
+  console.log({ article });
+  if (!article || !article.extra_info.category) {
     return {
       notFound: true,
     };
   }
-  const relatedArticles = [...socialPosts, ...trendingPosts];
+  await apolloClient.query({
+    query: GET_POSTS,
+    variables: {
+      where: {
+        categoryId: article.extra_info.category.id,
+      },
+      command: `category:${article.extra_info.category.id}`,
+      limit: 10,
+      start: 0,
+    },
+  });
 
   return {
     props: {
-      relatedArticles,
       initialApolloState: apolloClient.cache.extract(),
-    }
+    },
   };
 }
-
 
 Article.layout = Layout;
 

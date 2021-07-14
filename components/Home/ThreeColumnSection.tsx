@@ -3,28 +3,40 @@ import {
   Container,
   Divider,
   Stack,
-  useBreakpointValue,
   useColorMode,
   useMediaQuery,
 } from '@chakra-ui/react';
 import CategoryTitle from '../widgets/CategoryTitle';
-import { GiBlackBook } from 'react-icons/gi';
+import { BiMoney } from 'react-icons/bi';
 import { CategoryPost } from '@/components/widgets';
 import { IoIosPeople } from 'react-icons/io';
-import { IoMusicalNotesOutline } from 'react-icons/io5';
+import { GiHealthPotion } from 'react-icons/gi';
+import { useQuery } from '@apollo/client';
+import { ALL_CATEGORIES } from '@/services/GraphSchema';
+import { formatUnixDate } from '../../helpers/utils';
+import dayjs from 'dayjs';
 
-const ThreeColumnSection = ({ bookPosts, lifePosts, techPosts }) => {
+const ThreeColumnSection = ({
+  lifeData,
+  lifeLoading,
+  financeData,
+  financeLoading,
+  healthLoading,
+  healthData,
+}) => {
   const { colorMode } = useColorMode();
   const [isLargerThan768] = useMediaQuery('(min-width: 768px)');
+  const { data: catsData } = useQuery(ALL_CATEGORIES);
+
   return (
     <Container maxW="1170px" as={`section`}>
       <Stack direction={{ base: 'column', md: 'row' }} spacing={8}>
         <Box position={`relative`} flex={1}>
           <Box mb={8}>
             <CategoryTitle
-              title={`Book`}
+              title={`Tài chính`}
               icon={
-                <GiBlackBook
+                <BiMoney
                   fontSize={`2rem`}
                   color={colorMode === 'light' ? '#000' : '#c9c9c9'}
                 />
@@ -35,7 +47,29 @@ const ThreeColumnSection = ({ bookPosts, lifePosts, techPosts }) => {
                 fontWeight: `light`,
               }}
             />
-            <CategoryPost posts={bookPosts} limit={5} loading={false} />
+            {!financeLoading && (
+              <CategoryPost
+                posts={financeData.getPosts.map((post) => {
+                  const category = catsData.categories.find((cat) => {
+                    const matches = cat.tags.filter(
+                      (tag) => tag.id === post.content_tags[0]
+                    );
+                    return matches.length > 0;
+                  });
+                  return {
+                    ...post,
+                    imageUrl: post.images[0].src ?? post.extra_info.image,
+                    category: category ? category.name : 'Khác',
+                    publishDate:
+                      post.extra_info.date_published !== null
+                        ? formatUnixDate(post.extra_info.date_published / 1000)
+                        : dayjs(new Date(post.createdAt)).format('DD/MM/YYYY'),
+                  };
+                })}
+                limit={5}
+                loading={false}
+              />
+            )}
           </Box>
           {!isLargerThan768 && <Divider mt={8} />}
         </Box>
@@ -55,7 +89,29 @@ const ThreeColumnSection = ({ bookPosts, lifePosts, techPosts }) => {
                 fontWeight: `light`,
               }}
             />
-            <CategoryPost posts={lifePosts} limit={5} loading={false} />
+            {!lifeLoading && (
+              <CategoryPost
+                posts={lifeData.getPosts.map((post) => {
+                  const category = catsData.categories.find((cat) => {
+                    const matches = cat.tags.filter(
+                      (tag) => tag.id === post.content_tags[0]
+                    );
+                    return matches.length > 0;
+                  });
+                  return {
+                    ...post,
+                    imageUrl: post.images[0].src ?? post.extra_info.image,
+                    category: category ? category.name : 'Khác',
+                    publishDate:
+                      post.extra_info.date_published !== null
+                        ? formatUnixDate(post.extra_info.date_published / 1000)
+                        : dayjs(new Date(post.createdAt)).format('DD/MM/YYYY'),
+                  };
+                })}
+                limit={5}
+                loading={false}
+              />
+            )}
           </Box>
           {!isLargerThan768 && <Divider mt={8} />}
         </Box>
@@ -63,9 +119,9 @@ const ThreeColumnSection = ({ bookPosts, lifePosts, techPosts }) => {
         <Box position={`relative`} flex={1}>
           <Box mb={8}>
             <CategoryTitle
-              title={`Công nghệ`}
+              title={`Sức khỏe`}
               icon={
-                <IoMusicalNotesOutline
+                <GiHealthPotion
                   fontSize={`2rem`}
                   color={colorMode === 'light' ? '#000' : '#c9c9c9'}
                 />
@@ -76,7 +132,30 @@ const ThreeColumnSection = ({ bookPosts, lifePosts, techPosts }) => {
                 fontWeight: `light`,
               }}
             />
-            <CategoryPost posts={techPosts} limit={5} loading={false} />
+            {!healthLoading && (
+              <CategoryPost
+                posts={healthData.getPosts.map((post) => {
+                  const category = catsData.categories.find((cat) => {
+                    const matches = cat.tags.filter(
+                      (tag) => tag.id === post.content_tags[0]
+                    );
+                    return matches.length > 0;
+                  });
+                  console.log(post.extra_info.date_published);
+                  return {
+                    ...post,
+                    imageUrl: post.images[0].src ?? post.extra_info.image,
+                    category: category ? category.name : 'Khác',
+                    publishDate:
+                      post.extra_info.date_published !== null
+                        ? formatUnixDate(post.extra_info.date_published / 1000)
+                        : dayjs(new Date(post.createdAt)).format('DD/MM/YYYY'),
+                  };
+                })}
+                limit={5}
+                loading={false}
+              />
+            )}
           </Box>
         </Box>
       </Stack>

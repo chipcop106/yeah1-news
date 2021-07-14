@@ -1,20 +1,39 @@
 import { useMemo } from 'react';
 import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
 import { getStrapiURL } from '../helpers/utils';
-import { concatPagination } from '@apollo/client/utilities';
-import merge from 'deepmerge';
-import isEqual from 'lodash/isEqual';
-
 
 let apolloClient;
 
 function createApolloClient() {
   return new ApolloClient({
-    ssrMode: typeof window === "undefined",
+    ssrMode: typeof window === 'undefined',
     link: new HttpLink({
-      uri: getStrapiURL(),  // Add your Slash endpoint here
+      uri: getStrapiURL(), // Add your Slash endpoint here
     }),
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      typePolicies: {
+        Query: {
+          fields: {
+            getPosts: {
+              keyArgs: ['command', 'where'],
+              merge(
+                existing: any[],
+                incoming: any[],
+                { args: { start = 0, limit = 10, ...res } }
+              ) {
+                const merged = existing ? existing.slice(0) : [];
+                // Insert the incoming elements in the right places, according to args.
+                const end = start + Math.min(limit, incoming.length);
+                for (let i = start; i < end; ++i) {
+                  merged[i] = incoming[i - start];
+                }
+                return merged;
+              },
+            },
+          },
+        },
+      },
+    }),
   });
 }
 
@@ -31,7 +50,7 @@ export function initializeApollo(initialState = null) {
     _apolloClient.cache.restore({ ...existingCache, ...initialState });
   }
   // For SSG and SSR always create a new Apollo Client
-  if (typeof window === "undefined") return _apolloClient;
+  if (typeof window === 'undefined') return _apolloClient;
   // Create the Apollo Client once in the client
   if (!apolloClient) apolloClient = _apolloClient;
   return _apolloClient;

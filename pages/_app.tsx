@@ -12,7 +12,7 @@ import { useApollo } from '../lib/apolloClient';
 import theme from '@/styles/theme';
 import { DefaultSeo } from 'next-seo';
 import SEO from '../next-seo.config';
-
+import Layout from '@/components/layout';
 
 const Chakra = ({ cookies, children }) => {
   // b) Pass `colorModeManager` prop
@@ -29,9 +29,8 @@ const Chakra = ({ cookies, children }) => {
 
 const MyApp = (props: AppProps) => {
   const { Component, pageProps } = props as any;
-  const Layout = Component.layout || (({ children }) => <>{children}</>);
+  // const Layout = Component.layout || (({ children }) => <>{children}</>);
   const apolloClient = useApollo(pageProps.initialApolloState);
-
   return (
     <ApolloProvider client={apolloClient}>
       <Chakra cookies={pageProps.cookies}>
@@ -41,10 +40,10 @@ const MyApp = (props: AppProps) => {
           </Head>
           <Layout>
             <NextNprogress
-                color="#02f0dc"
-                startPosition={0.3}
-                stopDelayMs={200}
-                height={4}
+              color="#02f0dc"
+              startPosition={0.3}
+              stopDelayMs={200}
+              height={4}
             />
             <DefaultSeo {...SEO} />
             <Component {...pageProps} />

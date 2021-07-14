@@ -1,10 +1,9 @@
-import { Box, Container } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
+
 import Header from './Header';
 import Footer from './Footer';
 
-import { useColorMode } from '@chakra-ui/react';
-
-export default function Layout({ children }) {
+const Layout = ({ children }) => {
   return (
     <>
       <Header />
@@ -14,4 +13,6 @@ export default function Layout({ children }) {
       <Footer />
     </>
   );
-}
+};
+
+export default Layout;

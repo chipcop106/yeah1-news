@@ -31,57 +31,58 @@ import styled from '@emotion/styled';
 import { VscColorMode, VscChromeClose } from 'react-icons/vsc';
 import { CgDarkMode } from 'react-icons/cg';
 import { FiMenu } from 'react-icons/fi';
-import { AiOutlineHome } from 'react-icons/ai';
 import {
-  IoTimerOutline,
   IoAccessibilityOutline,
   IoPeopleOutline,
-  IoMusicalNotesOutline,
+  IoVideocamOutline,
 } from 'react-icons/io5';
+import { GrTechnology, GrGamepad } from 'react-icons/gr';
 import { FaBasketballBall } from 'react-icons/fa';
-import { MdOndemandVideo } from 'react-icons/md';
-import { GiBlackBook } from 'react-icons/gi';
 import { IoIosPeople } from 'react-icons/io';
 import { nanoid } from 'nanoid';
-import {useQuery} from "@apollo/client";
-import {ALL_CATEGORIES} from "../../services/GraphSchema";
 
 const menuLists = [
   {
     id: nanoid(),
-    title: 'Tin nóng 24h',
-    slug: 'tin-nong-24h',
-    icon: <IoTimerOutline />,
-  },
-  {
-    id: nanoid(),
-    title: 'Xã hội',
+    name: 'Xã hội',
     slug: 'xa-hoi',
     icon: <IoPeopleOutline />,
   },
   {
     id: nanoid(),
-    title: 'Giới trẻ',
+    name: 'Giới trẻ',
     slug: 'gioi-tre',
     icon: <IoAccessibilityOutline />,
   },
   {
     id: nanoid(),
-    title: 'Âm nhạc',
-    slug: 'am-nhac',
-    icon: <IoMusicalNotesOutline />,
+    name: 'Công nghệ',
+    slug: 'cong-nghe',
+    icon: <GrTechnology />,
   },
   {
     id: nanoid(),
-    title: 'Thể thao',
+    name: 'Đời sống',
+    slug: 'doi-song',
+    icon: <IoIosPeople />,
+  },
+  {
+    id: nanoid(),
+    name: 'Thể thao',
     slug: 'the-thao',
     icon: <FaBasketballBall />,
   },
   {
     id: nanoid(),
-    title: 'Đời sống',
-    slug: 'doi-song',
-    icon: <IoIosPeople />,
+    name: 'Game',
+    slug: 'game',
+    icon: <GrGamepad />,
+  },
+  {
+    id: nanoid(),
+    name: 'Video',
+    slug: 'video',
+    icon: <IoVideocamOutline />,
   },
 ];
 
@@ -147,7 +148,6 @@ const Styled = styled(Box)`
 `;
 
 const Header: FC = () => {
-  const { loading, error, data } = useQuery(ALL_CATEGORIES);
   const [showSearch, setShowSearch] = useState(false);
   const theme = useTheme();
   const router = useRouter();
@@ -171,7 +171,6 @@ const Header: FC = () => {
     }
   };
 
-
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
 
@@ -184,8 +183,11 @@ const Header: FC = () => {
     setShowSearch(!showSearch);
   };
 
-  if(loading) return <div>Loading...</div>
+  // if(loading) return <div>Loading...</div>
 
+  // @ts-ignore
+  // @ts-ignore
+  // @ts-ignore
   return (
     <Styled
       borderBottom={`4px`}
@@ -263,7 +265,7 @@ const Header: FC = () => {
             </Wrap>
             <Box>
               <RouteLink href={`/`}>
-                <Link pos={`relative`} >
+                <Link pos={`relative`}>
                   <Image
                     src={
                       colorMode === 'light'
@@ -334,7 +336,7 @@ const Header: FC = () => {
                   base: 4,
                 }}
               >
-                {data.categories.map((menu) => (
+                {menuLists.map((menu) => (
                   <WrapItem
                     width={{
                       md: `auto`,
@@ -347,28 +349,30 @@ const Header: FC = () => {
                       isActive={router.asPath === `/category/${menu.slug}`}
                     >
                       <Box
-                          py={2}
-                          d={`inline-flex`}
-                          alignItems={`center`}
-                         _after={{
-                        content: `''`,
-                        width: '100%',
-                        position: 'absolute',
-                        left: 0,
-                        bottom: 0,
-                        height: 1,
-                        opacity: router.asPath === `/category/${menu.slug}` ? 1 : 0,
-                        backgroundColor: theme.colors.secondary,
-                      }}
-                           _hover={{
-                             textDecoration: `none`,
-                             _after: {
-                               opacity: 1,
-                             },
-                           }}>
-                        {/*<Box as={`span`} mr={2}>*/}
-                        {/*  {menu.icon}*/}
-                        {/*</Box>*/}
+                        py={2}
+                        d={`inline-flex`}
+                        alignItems={`center`}
+                        _after={{
+                          content: `''`,
+                          width: '100%',
+                          position: 'absolute',
+                          left: 0,
+                          bottom: 0,
+                          height: 1,
+                          opacity:
+                            router.asPath === `/category/${menu.slug}` ? 1 : 0,
+                          backgroundColor: theme.colors.secondary,
+                        }}
+                        _hover={{
+                          textDecoration: `none`,
+                          _after: {
+                            opacity: 1,
+                          },
+                        }}
+                      >
+                        <Box as={`span`} mr={2}>
+                          {menu.icon}
+                        </Box>
 
                         {menu.name}
                       </Box>

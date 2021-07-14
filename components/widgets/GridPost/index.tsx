@@ -1,22 +1,6 @@
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 import styled from '@emotion/styled';
-import {
-  Image,
-  Link,
-  Box,
-  useTheme,
-  Text,
-  Heading,
-  Stack,
-  HStack,
-  Tag,
-  Button,
-  useColorMode,
-  useBreakpointValue,
-} from '@chakra-ui/react';
-import { default as RouteLink } from 'next/link';
-import date from 'date-fns';
-import format from 'date-fns/format';
+import { useTheme, Text, useColorMode } from '@chakra-ui/react';
 
 import { Skin01, Skin02 } from '@/components/widgets/GridPost/skin';
 

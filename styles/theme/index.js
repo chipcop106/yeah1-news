@@ -1,5 +1,4 @@
 import { extendTheme } from '@chakra-ui/react';
-import { createBreakpoints } from '@chakra-ui/theme-tools';
 import colors from '@/styles/theme/colors';
 import Button from '@/styles/theme/components';
 import IconButton from '@/styles/theme/components';

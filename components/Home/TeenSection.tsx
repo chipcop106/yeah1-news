@@ -2,23 +2,13 @@ import { Container, useColorMode } from '@chakra-ui/react';
 import CategoryTitle from '../widgets/CategoryTitle';
 import { IoAccessibilityOutline } from 'react-icons/io5';
 import { SliderPost } from '@/components/widgets';
-import {useQuery} from "@apollo/client";
-import {GET_CONTENT_CATEGORY} from "@/services/GraphSchema";
-import {formatUnixDate} from "../../helpers/utils";
+import { formatUnixDate } from '../../helpers/utils';
+import dayjs from 'dayjs';
 
-const TeenSection = () => {
+const TeenSection = ({ loading, data }) => {
   const { colorMode } = useColorMode();
-  const { loading, error, data } = useQuery(GET_CONTENT_CATEGORY, {
-    variables: {
-      where: {
-        categoryId: '60629fd2f6a2c23fb4daec60'
-      },
-      sort: "createAt:DESC",
-      limit: 24
-    }
-  });
 
-  if(loading) return <div>Loading...</div>
+  if (loading) return <div>Loading...</div>;
 
   return (
     <Container
@@ -44,15 +34,20 @@ const TeenSection = () => {
             fontWeight: `light`,
           }}
         />
-        {
-          data.getLastedPost.length > 0 && <SliderPost posts={data.getLastedPost.map(post => ({
-            ...post,
-            imageUrl: post.images[0]?.src ?? post.extra_info.image,
-            category: 'Giới trẻ',
-            publishDate: formatUnixDate(post.extra_info.date_published / 1000),
-
-          }))} loading={false} />
-        }
+        {data.length > 0 && (
+          <SliderPost
+            posts={data.map((post) => ({
+              ...post,
+              imageUrl: post.images[0]?.src ?? post.extra_info.image,
+              category: post.extra_info.category?.name ?? 'Khác',
+              publishDate:
+                post.extra_info.date_published !== null
+                  ? formatUnixDate(post.extra_info.date_published / 1000)
+                  : dayjs(new Date(post.createdAt)).format('DD/MM/YYYY'),
+            }))}
+            loading={false}
+          />
+        )}
       </Container>
     </Container>
   );
